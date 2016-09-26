@@ -8,6 +8,8 @@
 
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.89"]
+                 [thi.ng/geom "0.0.1178-SNAPSHOT"]
+                 [reagent "0.5.1"]
                  [org.clojure/core.async "0.2.385"
                   :exclusions [org.clojure/tools.reader]]]
 
