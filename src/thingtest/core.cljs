@@ -52,14 +52,6 @@
                                                          1,-1,0])
                                 :size 3
                                 }
-                     :color {
-                             :data (js/Float32Array. [
-                                                      1.0, 1.0, 1,0,
-                                                      1.0, 1.0, 1,0,
-                                                      1.0, 1.0, 1,0,
-                                                      ])
-                             :size 3
-                             }
                      },
            :mode glc/triangles
            :num-vertices 3}
