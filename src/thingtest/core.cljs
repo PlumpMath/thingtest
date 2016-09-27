@@ -6,16 +6,18 @@
    [thi.ng.math.core :as m :refer [PI HALF_PI TWO_PI]]
    [thi.ng.geom.core :as g]
    [thi.ng.geom.cuboid :as c]
+   [thi.ng.typedarrays.core :as ta]
    [thi.ng.geom.gl.core :as gl]
    [thi.ng.geom.gl.webgl.constants :as glc]
    [thi.ng.geom.gl.buffers :as buf]
+   [thi.ng.geom.matrix :refer [M44]]
    [thi.ng.geom.gl.webgl.animator :as anim]
    [thi.ng.geom.gl.shaders.phong :as phong]
    [thi.ng.geom.gl.shaders :as shd]))
 
 (enable-console-print!)
 
-(defonce app (reagent/atom {:selected 1}))
+(defonce app (reagent/atom {:selected 2}))
 
 ;; Lesson 1
 ;;---------------------------------------------------------------------------
@@ -42,13 +44,12 @@
   (let [ctx (gl/gl-context (reagent/dom-node this))]
     (let [shader (shd/make-shader-from-spec ctx shader-0-spec)
           spec
-          {:attribs {:position {:data (js/Float32Array. [0,1,0
-                                                         -1,-1,0
-                                                         1,-1,0])
+          {:attribs {:position {:data (ta/float32 [0,1,0
+                                                   -1,-1,0
+                                                   1,-1,0])
                                 :size 3}}
            :mode glc/triangles
-           :num-vertices 3}
-          ]
+           :num-vertices 3}]
       (swap! app assoc
              :ctx ctx
              :spec
@@ -66,7 +67,6 @@
         (gl/draw-with-shader ctx spec)))
     (:active (reagent/state this))))
 
-
 ;; Lesson 2
 ;;---------------------------------------------------------------------------
 
@@ -76,7 +76,7 @@
    "
     void main(void) {
         gl_Position = vec4(position, 1.0);
-        vColor = vec4(color, 1.0);
+        vColor = vec4(butt, 1.0);
     }
     "
    :fs
@@ -86,29 +86,24 @@
     }
    "
 
-   :varying {
-             :vColor :vec4
-             }
-   :attribs {
-             :position :vec3
-             :color :vec3
-             }})
+   :varying {:vColor :vec4}
+   :attribs {:position :vec3
+             :butt :vec3}})
 
 (defn init-1
   [this]
   (let [ctx (gl/gl-context (reagent/dom-node this))]
     (let [shader (shd/make-shader-from-spec ctx shader-1-spec)
           spec
-          {:attribs {:position {:data (js/Float32Array. [0, 1,0
-                                                        -1,-1,0
-                                                         1,-1,0])
+          {:attribs {:position {:data (ta/float32 [0, 1,0
+                                                   -1,-1,0
+                                                   1,-1,0])
                                 :size 3}
-                     :color {:data (js/Float32Array.
-                                    [1, 0, 0
-                                     0, 1, 0
-                                     0, 0, 1
-                                     ])
-                             :size 3}}
+                     :butt {:data (ta/float32
+                                   [1, 0, 0
+                                    0, 1, 0
+                                    0, 0, 1])
+                            :size 3}}
            :mode glc/triangles
            :num-vertices 3}]
       (swap! app assoc
@@ -124,6 +119,66 @@
       (when ctx
         (gl/clear-color-buffer ctx 0 0 0 1)
         (gl/draw-with-shader ctx spec)))
+    (:active (reagent/state this))))
+
+;; Lesson 3
+;;---------------------------------------------------------------------------
+
+
+(def shader-2-spec
+  {:vs
+   "
+    void main(void) {
+        gl_Position = view*vec4(position, 1.0);
+        vColor = vec4(butt, 1.0);
+    }
+    "
+   :fs
+   "
+    void main(void) {
+        gl_FragColor = vColor;
+    }
+   "
+
+   :uniforms {:view [:mat4 M44]}
+   :varying {:vColor :vec4}
+   :attribs {:position :vec3
+             :butt :vec3}})
+
+(defn init-2
+  [this]
+  (let [ctx (gl/gl-context (reagent/dom-node this))]
+    (let [shader (shd/make-shader-from-spec ctx shader-2-spec)
+          spec
+          {:attribs {:position {:data (ta/float32 [0, 1,0
+                                                   -1,-1,0
+                                                   1,-1,0])
+                                :size 3}
+                     :butt {:data (ta/float32
+                                   [1, 0, 0
+                                    1, 1, 1
+                                    1, 0, 1])
+                            :size 3}}
+           :uniforms {:view M44}
+           :mode glc/triangles
+           :num-vertices 3}]
+      (swap! app assoc
+             :ctx ctx
+             :spec
+             (assoc (gl/make-buffers-in-spec spec ctx glc/static-draw)
+                    :shader shader)))))
+
+(defn update-2
+  [this]
+  (fn [t frame]
+    (let [{:keys [ctx shader spec]} @app]
+      (when ctx
+        (gl/clear-color-buffer ctx 0 0 0 1)
+        (gl/draw-with-shader ctx
+                             (assoc-in spec [:uniforms :view] (-> M44
+                                                                  (g/rotate-z t)
+                                                                  (g/rotate-y (* 3 t))
+                                                                  (g/scale (/ (+ 1 (Math/sin t)) 2)))))))
     (:active (reagent/state this))))
 
 ;; Common components
@@ -149,19 +204,20 @@
         props)])}))
 
 (defn lesson0 []
-  [gl-component {:init init-0 :loop update-0 :width 640 :height 640 :selected (:selected @app)}]
-  )
+  [gl-component {:init init-0 :loop update-0 :width 640 :height 640 :selected (:selected @app)}])
 
 (defn lesson1 []
-  [gl-component {:init init-1 :loop update-1 :width 640 :height 640 :selected (:selected @app)}]
-  )
+  [gl-component {:init init-1 :loop update-1 :width 640 :height 640 :selected (:selected @app)}])
+
+(defn lesson2 []
+  [gl-component {:init init-2 :loop update-2 :width 640 :height 640 :selected (:selected @app)}])
 
 (defn app-component
   []
   [:div
    [:h2 "controls"]
    (into [:ul.menu]
-         (for [n (range 2)]
+         (for [n (range 3)]
            [:li {:class (when (= n (:selected @app)) "active")}
             [:a {:href "#"
                  :on-click (fn [e]
@@ -172,6 +228,7 @@
    [:div (case (:selected @app)
            0 [lesson0]
            1 [lesson1]
+           2 [lesson2]
            :else
            [:h3 "Unknown."])]])
 
