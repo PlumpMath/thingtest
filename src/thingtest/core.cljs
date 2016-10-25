@@ -3,13 +3,11 @@
             [thingtest.data :refer [app]]
             [thingtest.lesson1 :refer [lesson1]]
             [thingtest.lesson2 :refer [lesson2]]
-            [thingtest.lesson3 :refer [lesson3]]
-            ))
+            [thingtest.lesson3 :refer [lesson3]]))
 
 (enable-console-print!)
 
-(defn app-component
-  []
+(defn app-component []
   [:div
    [:h2 "controls"]
    (into [:ul.menu]
@@ -18,7 +16,7 @@
             [:a {:href "#"
                  :on-click (fn [e]
                              (.preventDefault e)
-                             (when (not= (:selected @app)n)
+                             (when (not= (:selected @app) n)
                                (reset! app {:selected n})))}
              (str "Lesson " n)]]))
    [:h4 "Selected: " (:selected @app)]
@@ -29,8 +27,7 @@
            :else
            [:h3 "Unknown."])]])
 
-(defn main
-  []
+(defn main []
   (reagent/render-component
    [app-component]
    (.getElementById js/document "app")))

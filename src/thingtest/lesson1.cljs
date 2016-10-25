@@ -30,8 +30,7 @@
   {:width 640
    :height 640
    :init
-   (fn
-     [this]
+   (fn [this]
      (let [ctx (gl/gl-context (reagent/dom-node this))
            shader (shd/make-shader-from-spec ctx shader-spec)
            spec
@@ -48,8 +47,7 @@
                 :spec spec-prepared)))
 
    :update
-   (fn
-     [this]
+   (fn [this]
      (fn [t frame]
        (let [{:keys [ctx shader spec]} @app]
          (when ctx

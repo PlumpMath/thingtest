@@ -34,8 +34,7 @@
              :butt :vec3}})
 
 (def props
-  {
-   :height 640
+  {:height 640
    :width 640
    :init
    (fn [this]
@@ -71,8 +70,7 @@
                                                                      (g/rotate-z t)
                                                                      (g/rotate-y (* 3 t))
                                                                      (g/scale (+ 0.1 (/ (+ 1 (Math/sin t)) 2))))))))
-       (:active (reagent/state this))))
-   })
+       (:active (reagent/state this))))})
 
 (defn lesson3 []
   [gl-component props])

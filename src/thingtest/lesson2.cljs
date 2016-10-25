@@ -30,12 +30,10 @@
              :butt :vec3}})
 
 (def props
-  {
-   :width 640
+  {:width 640
    :height 640
    :init
-   (fn
-     [this]
+   (fn [this]
      (let [ctx (gl/gl-context (reagent/dom-node this))]
        (let [shader (shd/make-shader-from-spec ctx shader-spec)
              spec
@@ -57,16 +55,13 @@
                        :shader shader)))))
 
    :update
-   (fn
-     [this]
+   (fn [this]
      (fn [t frame]
        (let [{:keys [ctx shader spec]} @app]
          (when ctx
            (gl/clear-color-buffer ctx 0 0 0 1)
            (gl/draw-with-shader ctx spec)))
-       (:active (reagent/state this))))
-
-   })
+       (:active (reagent/state this))))})
 
 (defn lesson2 []
   [gl-component props])
